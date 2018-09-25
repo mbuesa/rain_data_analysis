@@ -1,0 +1,124 @@
+## VARIABLES --> Input 
+
+#PATHWAYS
+sheffield_data_filepath <- c("intern_data.txt") # !! GEO DATA Pathway !!
+chirps_data_filepath <- c("intern_data_CHIRPS.txt") # !! CHIRPS GEO DATA PATHWAY !!
+location_filepath <- c("intern_data_loc.txt") # !! LOCATION Pathway !! 
+
+#INPUT VARIABLES
+time_year_start <- c(1985) # !! Year in question !!
+time_year_end <- c(1999)
+location <- c(10) # !! Location # according to location_loc file !!
+bartlett <- c(31)
+data_name <- c("Sheffield","Chirps")
+first_time_frame_start <- c("0501")
+first_time_frame_end <- c("0715")
+second_time_frame_start <- c("0716")
+second_time_frame_end <- c("0920")
+
+
+
+
+
+
+## Bartlett Noise Filter
+
+bartlett_noise_filter <- function(x,y) { 
+  # x = data set
+  # y = size of bartlett filter
+  installed.packages("signal")
+  library(signal)
+  bartlett_window <- c(bartlett(y))
+  bartlett_sum <- sum(bartlett_window)
+  filtered_data <- stats::filter(x,bartlett_window/bartlett_sum,method="convolution")
+  return(filtered_data)
+}
+
+
+# LOAD DATA 
+index <- c(0)
+sheffield_data <- read.table(sheffield_data_filepath, header = FALSE) # reads rainfall data
+  sheffield_data[,18] <- c(index+1) #creates a unique identifier in the 18th column to mark sheffield data as the first data set
+  index <- c(index+1)
+  chirps_data <- read.table(chirps_data_filepath, header = FALSE) #reads CHIRP rainfall data
+  chirps_data[,18] <- c(index+1)
+  index <- c(index+1)
+all_rain_data <- rbind(sheffield_data,chirps_data)
+names(all_rain_data) <- c("Date")
+for (rows
+     in 2:17) {
+  all_rain_data[,rows] <- bartlett_noise_filter(all_rain_data[,rows],bartlett)
+}
+
+
+#Data Analysis
+time_period_start <- as.numeric(paste(time_year_start,1,1,sep = "0"))
+time_period_end <- as.numeric(paste(time_year_end,1,1,sep = "0"))
+
+
+require(lubridate)
+all_rain_data$Date <- ymd(all_rain_data$Date)
+applicable_year <- all_rain_data[(all_rain_data$Date < ymd(time_period_end) & all_rain_data$Date >= ymd(time_period_start)),]
+
+average_rain <- aggregate(applicable_year, by=list(applicable_year$Date), FUN=mean,na.rm=TRUE)
+
+#PLOT
+par(mfrow=c(2,1))
+year_data <- paste("Rain from",as.character(time_year_start),"to",as.character(time_year_end), "at Location", as.character(location),sep=" ")
+x <- 1
+days_to_plot <- applicable_year[,18]==x
+data_for_days_to_plot <- c(applicable_year[days_to_plot,location])
+x_axis <- paste("By Month Starting in January",as.character(time_year_start),"to",as.character(time_year_end), sep=" ")
+plot(average_rain$Date, average_rain[,location], xlab=x_axis,ylab="Rainfall Rate mm/day", main=year_data, type="n", ylim=c(0,max(data_for_days_to_plot)+4))
+lines(average_rain$Date, average_rain[,location])
+legend("topright", c("Average rain"))
+plot(average_rain$Date, data_for_days_to_plot, xlab=x_axis,ylab="Rainfall Rate mm/day", main=year_data, type="n",ylim=c(0,max(data_for_days_to_plot)+4))
+lines(average_rain$Date, data_for_days_to_plot,col=(x), lty=x)
+for (x in 2:index){
+  days_to_plot <- applicable_year[,18]==x
+  data_for_days_to_plot <- c(applicable_year[days_to_plot,location])
+  points(average_rain$Date, data_for_days_to_plot,xlab=x_axis,ylab="Rainfall Rate mm/day", main=year_data, type="n",ylim=c(0,max(data_for_days_to_plot)+4))
+  lines(average_rain$Date, data_for_days_to_plot, col=(x))
+}
+legend("topright", legend=c(data_name), lty=1:length(data_name), col=(1:x))
+
+
+
+
+
+
+# Data Analysis
+
+max_rain_first_period <- matrix(nrow = (time_year_end+1)-(time_year_start),ncol = index)
+days_max_rain_first_period <- matrix(nrow = (time_year_end+1)-(time_year_start),ncol = index)
+for (y in 1:index) {
+  z <- c(0)
+  for (x in time_year_start:time_year_end){
+    z <- c(z+1)
+    time_frame_start <- c(as.numeric(paste(x,first_time_frame_start,sep = "")))
+    time_frame_end <- c(as.numeric(paste(x,first_time_frame_end,sep="")))
+    applicable_days <- all_rain_data[(all_rain_data$Date >= ymd(time_frame_start) & all_rain_data$Date <= ymd(time_frame_end)),]
+    days_to_plot <- applicable_days[,18]==y
+    max_rain_first_period[z,y] <- c(max(applicable_days[days_to_plot,location]))
+    days_max_rain_first_period[z,y] <- applicable_days[(max(applicable_days[days_to_plot,location]) == applicable_days[,location]),1]
+  }
+    
+}
+names(max_rain_first_period) <- c(data_name)
+
+max_rain_second_period <- matrix(nrow = (time_year_end+1)-(time_year_start),ncol = index)
+days_max_rain_SECOND_period <- matrix(nrow = (time_year_end+1)-(time_year_start),ncol = index)
+for (y in 1:index) {
+  z <- c(0)
+  for (x in time_year_start:time_year_end){
+    z <- c(z+1)
+    time_frame_start <- c(as.numeric(paste(x,second_time_frame_start,sep = "")))
+    time_frame_end <- c(as.numeric(paste(x,second_time_frame_end,sep="")))
+    applicable_days <- all_rain_data[(all_rain_data$Date >= ymd(time_frame_start) & all_rain_data$Date <= ymd(time_frame_end)),]
+    days_to_plot <- applicable_days[,18]==y
+    max_rain_second_period[z,y] <- c(max(applicable_days[days_to_plot,location]))
+    days_max_rain_second_period[z,y] <- applicable_days[(max(applicable_days[days_to_plot,location]) == applicable_days[,location]),1]
+  }
+  
+}
+names(max_rain_second_period) <- c(data_name)
