@@ -102,7 +102,7 @@ for (y in 1:index) {
     max_rain_first_period[z,y] <- c(max(applicable_days[days_to_plot,location]))
     days_max_rain_first_period[z,y] <- applicable_days[(max(applicable_days[days_to_plot,location]) == applicable_days[,location]),1]
   }
-    
+    days_max_rain_first_period <- as.Date(days_max_rain_first_period, origin = "1970-01-01")
 }
 names(max_rain_first_period) <- c(data_name)
 
@@ -119,6 +119,43 @@ for (y in 1:index) {
     max_rain_second_period[z,y] <- c(max(applicable_days[days_to_plot,location]))
     days_max_rain_second_period[z,y] <- applicable_days[(max(applicable_days[days_to_plot,location]) == applicable_days[,location]),1]
   }
-  
+  days_max_rain_second_period <- as.Date(days_max_rain_second_period, origin = "1970-01-01")
 }
 names(max_rain_second_period) <- c(data_name)
+
+
+min_rain_period <- matrix(nrow = (time_year_end+1)-(time_year_start),ncol = index)
+days_min_rain <- matrix(nrow = (time_year_end+1)-(time_year_start),ncol = index)
+for (y in 1:index) {
+  z <- (0)
+  for (x in time_year_start:time_year_end){
+    z <- (z+1)
+    time_frame_start <- (days_max_rain_first_period[z])
+    time_frame_end <- (days_max_rain_second_period[z])
+    applicable_days <- all_rain_data[(all_rain_data$Date >= ymd(time_frame_start) & all_rain_data$Date <= ymd(time_frame_end)),]
+    days_to_plot <- applicable_days[,18]==y
+    min_rain_period[z,y] <- (min(applicable_days[days_to_plot,location]))
+  }
+}
+                          
+
+days_between_max_rain <- (days_max_rain_first_period - days_max_rain_second_period)
+names(max_rain_second_period) <- c(data_name)
+
+#Plot max values
+par(mfrow=c(3,1))
+x <- 1
+main_title <- paste("Max Rain From",time_frame_start,"to",time_frame_end)
+plot((time_year_start:time_year_end),max_rain_first_period[,1],xlab="Year",ylab="Rain in mm/day",main="Max Rain Period 1",type="o",col=x)
+  points((time_year_start:time_year_end),max_rain_first_period[,2],type="o",col=(x+1))
+  legend("topright", legend=c(data_name), lty=1:length(data_name), col=(1:x))
+  
+plot((time_year_start:time_year_end),max_rain_second_period[,1],xlab="Year",ylab="Rain in mm/day",main="Max Rain Period 2",type="o",col=x)
+  points((time_year_start:time_year_end),max_rain_second_period[,2],xlab="Year",ylab="Rain in mm/day",main="Max Rain Period 1",type="o",col=(x+1))
+  legend("topright", legend=c(data_name), lty=1:length(data_name), col=(1:x))
+  
+plot((time_year_start:time_year_end),min_rain_period[,1],xlab="Year",ylab="Rain in mm/day",main="Min Rain Between Max Periods",type="o",col=x)
+  points((time_year_start:time_year_end),min_rain_period[,2],xlab="Year",ylab="Rain in mm/day",main="Max Rain Period 1",type="o",col=(x+1))
+  legend("topright", legend=c(data_name), lty=1:length(data_name), col=(1:x))
+  
+
