@@ -162,5 +162,10 @@ plot((time_year_start:time_year_end),min_rain_period[,1],xlab="Year",ylab="Rain 
 par(mfrow=c(1,1))
 boxplot(max_rain_first_period[,1],max_rain_first_period[,2],min_rain_period[,1],min_rain_period[,2],max_rain_second_period[,1],max_rain_second_period[,2], names= c("Max Sheffield Period 1","Max CHIRPS Period 1","Max Sheffield Period 2","Max CHIRPS Period 2","Min Period 1","Min Period 2"))
 
-duration <- abs(days_between_max_rain) 
-intensity <- (max_rain_first_period+max_rain_second_period)/2-min_rain_period
+duration <- abs(days_between_max_rain) #creates the duration by taking the absolute value from the days between max rain but stores as a drftime  
+# duration <- as.matrix(duration) #converts the drftime to numbers for box plot
+intensity <- (max_rain_first_period+max_rain_second_period)/2-min_rain_period # intensity = average max rain minus min rain
+
+par(mfrow=c(1,2))
+boxplot(duration[,1],duration[,2], names= c("Sheffield","CHIRPS"), main= "Duration in Rain")
+boxplot(intensity[,1],intensity[,2], names = c("Sheffield","CHIRPS"), main = "Intensity in Rain")
