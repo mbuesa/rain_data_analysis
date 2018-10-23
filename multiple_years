@@ -159,3 +159,8 @@ plot((time_year_start:time_year_end),min_rain_period[,1],xlab="Year",ylab="Rain 
   legend("topright", legend=c(data_name), lty=1:length(data_name), col=(1:x))
   
 
+par(mfrow=c(1,1))
+boxplot(max_rain_first_period[,1],max_rain_first_period[,2],min_rain_period[,1],min_rain_period[,2],max_rain_second_period[,1],max_rain_second_period[,2], names= c("Max Sheffield Period 1","Max CHIRPS Period 1","Max Sheffield Period 2","Max CHIRPS Period 2","Min Period 1","Min Period 2"))
+
+duration <- abs(days_between_max_rain) 
+intensity <- (max_rain_first_period+max_rain_second_period)/2-min_rain_period
