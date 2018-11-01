@@ -169,3 +169,10 @@ intensity <- (max_rain_first_period+max_rain_second_period)/2-min_rain_period # 
 par(mfrow=c(1,2))
 boxplot(duration[,1],duration[,2], names= c("Sheffield","CHIRPS"), main= "Duration in Rain")
 boxplot(intensity[,1],intensity[,2], names = c("Sheffield","CHIRPS"), main = "Intensity in Rain")
+
+
+onset_days_naturalized <- as.Date(days_max_rain_first_period, "%Y-%m-%d") #converts days of max rain into a date
+year(onset_days_naturalized) <- 1990 #equalizes all the years to 1990 (arbitrary)
+boxplot(onset_days_naturalized, main= "Average Onset Day") #plots the days of onset rain as a boxplot
+
+as.data.frame(as.table(days_max_rain_first_period))
