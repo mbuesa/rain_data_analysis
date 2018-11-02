@@ -10,7 +10,7 @@ time_year_start <- c(1985) # !! Year in question !!
 time_year_end <- c(1999)
 location <- c(10) # !! Location # according to location_loc file !!
 bartlett <- c(31)
-data_name <- c("Sheffield","Chirps")
+data_name <- c("Sheffield","Chirps") z
 first_time_frame_start <- c("0501")
 first_time_frame_end <- c("0715")
 second_time_frame_start <- c("0716")
@@ -26,17 +26,17 @@ second_time_frame_end <- c("0920")
 bartlett_noise_filter <- function(x,y) { 
   # x = data set
   # y = size of bartlett filter
-  installed.packages("signal")
-  library(signal)
-  bartlett_window <- c(bartlett(y))
-  bartlett_sum <- sum(bartlett_window)
-  filtered_data <- stats::filter(x,bartlett_window/bartlett_sum,method="convolution")
+  installed.packages("signal") #checks to see if signal is installed 
+  library(signal) #installs signal package
+  bartlett_window <- c(bartlett(y)) #contructs a Bartlett vector with the size of the bartlett filter
+  bartlett_sum <- sum(bartlett_window) #creates a sum of the bartlett window to construct an average 
+  filtered_data <- stats::filter(x,bartlett_window/bartlett_sum,method="convolution") #applies filter weighted on the average and divded by the sum of the bartlett window to smooth out the data 
   return(filtered_data)
 }
 
 
 # LOAD DATA 
-index <- c(0)
+index <- c(0) #set index to zero, used to separate the data sources into unique columns
 sheffield_data <- read.table(sheffield_data_filepath, header = FALSE) # reads rainfall data
   sheffield_data[,18] <- c(index+1) #creates a unique identifier in the 18th column to mark sheffield data as the first data set
   index <- c(index+1)
@@ -52,8 +52,8 @@ for (rows
 
 
 #Data Analysis
-time_period_start <- as.numeric(paste(time_year_start,1,1,sep = "0"))
-time_period_end <- as.numeric(paste(time_year_end,1,1,sep = "0"))
+time_period_start <- as.numeric(paste(time_year_start,1,1,sep = "0")) #creates an as.date period using the start year
+time_period_end <- as.numeric(paste(time_year_end,1,1,sep = "0")) #creates end as.Date period using end year 
 
 
 require(lubridate)
